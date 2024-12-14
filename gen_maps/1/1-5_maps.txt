@@ -6,7 +6,6 @@ game = doom1
 mode = sp
 engine = gzdoom
 length = single
-seed = 1331610757
 
 theme = original
 size = tiny
