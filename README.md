@@ -16,4 +16,6 @@ data = np.load('data/mywayhome_data.npz')
 d1 = data['maps']
 d2 = data['images']
 d3 = data['positions']
+d4 = data['depth']
+d5 = data['objects']
 ```
