@@ -182,14 +182,21 @@ def process_map(map_index, game_config='resources/temp_maps/datagen.cfg', scenar
 def main():
     # Set up parallel processing
     num_processes = mp.cpu_count() - 1  # Leave one CPU free
+    
+    from functools import partial
+    scenario_path = 'data/maps_1key_noaug/30x30.wad'
+    process_map_fn = partial(process_map, scenario_path=scenario_path)
+    folder_name = scenario_path.split('/')[-2]
     pool = mp.Pool(processes=num_processes)
-    n_maps = 100
+    n_maps = 99
     # Process maps in parallel
-    results = pool.map(process_map, range(n_maps))
+    results = pool.map(process_map_fn, range(n_maps))
 
     # Close the pool
     pool.close()
     pool.join()
+    
+    print("all processes finished")
 
     # Combine results
     images = np.array([result[0] for result in results])
@@ -198,6 +205,8 @@ def main():
     depth = np.array([result[3] for result in results])
     objects = np.array([result[4] for result in results])
     # Get dimensions
+    
+    print("all data combined")
 
     samples_per_map = maps.shape[0] // n_maps
 
@@ -207,9 +216,13 @@ def main():
     positions_split = np.array_split(positions, n_maps)
     depth_split = np.array_split(depth, n_maps)
 
+    print("saving data")
     # Save each split as separate file
+    import os
+    os.makedirs(f'data/{folder_name}/processed', exist_ok=True)
     for i in range(n_maps):
-        np.savez(f'data/maps/map{i+1}_data.npz',
+        print(f"saving map {i+1}/{n_maps}")
+        np.savez(f'data/{folder_name}/processed/map{i+1}_data.npz',
                  maps=maps_split[i],
              images=images_split[i],
              positions=positions_split[i],
