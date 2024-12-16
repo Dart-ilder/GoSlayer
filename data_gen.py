@@ -167,7 +167,7 @@ def process_map(map_index, game_config='resources/temp_maps/datagen.cfg', scenar
         prev_positions.append((curr_x, curr_y))
         
         temp_objects = state.objects
-        inner_objects = [{'x': obj.position_x, 'y': obj.position_y, 'z': obj.position_z, 'angle': obj.angle} for obj in temp_objects if obj.name == 'RedCard']
+        inner_objects = [{'x': obj.position_x, 'y': obj.position_y, 'z': obj.position_z, 'angle': obj.angle} for obj in temp_objects if (obj.name == 'RedCard' and obj.id == 0)]
         
         map_images.append(np.array([tmp_img]))
         map_maps.append(np.array([tmp_processed_map]))
@@ -184,11 +184,11 @@ def main():
     num_processes = mp.cpu_count() - 1  # Leave one CPU free
     
     from functools import partial
-    scenario_path = 'data/maps_1key_noaug/30x30.wad'
+    scenario_path = 'data/large_maps_manykeys_aug/50x50.wad'
     process_map_fn = partial(process_map, scenario_path=scenario_path)
     folder_name = scenario_path.split('/')[-2]
     pool = mp.Pool(processes=num_processes)
-    n_maps = 99
+    n_maps = 9
     # Process maps in parallel
     results = pool.map(process_map_fn, range(n_maps))
 
@@ -203,9 +203,14 @@ def main():
     maps = np.array([result[1] for result in results]) 
     positions = np.array([result[2] for result in results])
     depth = np.array([result[3] for result in results])
-    objects = np.array([result[4] for result in results])
+    objects = [result[4] for result in results]
     # Get dimensions
     
+    
+    for obj in objects:
+        if obj == None:
+            print("None")
+            
     print("all data combined")
 
     samples_per_map = maps.shape[0] // n_maps
