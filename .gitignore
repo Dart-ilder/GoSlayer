@@ -1,2 +1,3 @@
-GoSlayer/data/*.npz
+*.npz
 *.ini
+*.log
