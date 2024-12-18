@@ -37,7 +37,6 @@ class ImageMapsDataset(Dataset):
         y = y.astype(np.int16)
 
         pic = np.ones((240, 320))
-
         pic[-y, x] = np.zeros(len(y))
         
         return pic
@@ -50,12 +49,6 @@ class ImageMapsDataset(Dataset):
         data = np.load(f'{self.images_path}/map{i+1}_data.npz')
         
         points = np.asarray(o3d.io.read_point_cloud(f"{self.points_path}/map{i+1}_{j}.ply").points)
-        points_padded = np.zeros((6000, 3))
-        n = points.shape[0]
-        left_shift = (6000 - n) // 2
-        right_shift = left_shift + (6000 - n) % 2
-        points_padded[left_shift:6000-right_shift, :] = points
-        points_padded = torch.from_numpy(points_padded.T).to(torch.float32)
         
         im = data['images'][0,j,0]
         map = data['maps'][0,j,0]
@@ -166,7 +159,7 @@ def gauss_pixel_loss(y_true, y_pred, loss_fn, gb):
     return loss_fn(y_pred, y_true)
 
     
-def train(model, max_epoch, train_loader, optimizer, loss_fn, gb, device='cpu', plot=False):
+def train(model, max_epoch, train_loader, optimizer, loss_fn, gb, device='cpu'):
     losses = []
     for _ in tqdm(range(max_epoch)):
         model.train()
@@ -181,18 +174,6 @@ def train(model, max_epoch, train_loader, optimizer, loss_fn, gb, device='cpu', 
             losses.append(loss.detach().cpu().numpy())
             optimizer.step()
             
-        if plot:
-            fig, ax = plt.subplots(ncols=2, figsize=(9, 3))
-            ex = torch.sigmoid(output[0].detach().cpu()).numpy()[0]
-            mp = gb(maps[0].detach().cpu()).numpy()[0]
-            ax[0].imshow(ex)
-            ax[0].set_axis_off()
-            ax[0].set_title("Prediction")
-            ax[1].imshow(mp)
-            ax[1].set_axis_off()
-            ax[1].set_title("Ground Truth (Map)")
-            plt.show()
-            
     return losses
 
 
@@ -201,9 +182,6 @@ def main():
     message = "Write path to save model's weights.\nIf you don't need save, write 'n'\n"
     savepath = input(message)
     
-    message_plot = "If you want to plot temporary model results, input 'y'. Print 'n' otherwise\n"
-    plot_res = input(message_plot)
-    to_plot = True if plot_res=='y' else False
     
     images_path = "./data/maps_1key_noaug/processed"
     points_path = "./data/point_clouds/point_clouds11"
@@ -225,7 +203,7 @@ def main():
     
     max_epoch = 10
     
-    losses = train(model, max_epoch, train_loader, optimizer, loss_fn, gb, device=device, plot=to_plot)
+    losses = train(model, max_epoch, train_loader, optimizer, loss_fn, gb, device=device)
     
     if savepath != 'n':
         torch.save(model.state_dict(), savepath)
