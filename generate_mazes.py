@@ -11,5 +11,4 @@ train_env = MazeExplorer(number_maps=10,
                          keys=400,
                          data_augmentation=True,
                          mazes_path="data/large_maps_manykeys_aug")
-# train_env.generate_mazes()
 
