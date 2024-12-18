@@ -2,7 +2,7 @@ from tqdm.auto import tqdm
 import sys
 import os
 sys.path.insert(0, "./data/maps_1key_noaug/processed/Depth-Anything-V2")
-
+import open3d as o3d
 import numpy as np
 import matplotlib.pyplot as plt
 import torch.nn as nn
