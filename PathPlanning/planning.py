@@ -1,3 +1,5 @@
+import numpy as np
+
 def to_grid(mp, cell_size=10):
     """Receives global map and returns a grid of the same size, with walls as 0 and empty space as 255."""
     grid = np.full((mp.shape[0]//cell_size, mp.shape[1]//cell_size), 255)
